@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Monthly Budget
+Resources:
+  ChatBotRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Description: "Chatbot role for slack notification"
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: "chatbot.amazonaws.com"
+          Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "ChatbotNortificationsOnly-Policy"
+          # https://docs.aws.amazon.com/chatbot/latest/adminguide/chatbot-iam-policies.html
+          # "The AWS Chatbot Notification Permissions IAM policy" そのまま
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "cloudwatch:Describe*"
+                  - "cloudwatch:Get*"
+                  - "cloudwatch:List*"
+                Resource: "*"
+  BudgetAlertTopic:
+    Type: "AWS::SNS::Topic"
+  BudgetAlertTopicPolicy:
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      # https://docs.aws.amazon.com/ja_jp/awsaccountbilling/latest/aboutv2/budgets-sns-policy.html の内容そのまま
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "BudgetsSNSPublishingPermissions"
+            Effect: "Allow"
+            Principal:
+              Service: "budgets.amazonaws.com"
+            Action: "SNS:Publish"
+            Resource: !Ref BudgetAlertTopic
+      Topics:
+        - !Ref BudgetAlertTopic
+  NortificationChatBot:
+    Type: "AWS::Chatbot::SlackChannelConfiguration"
+    Properties:
+      ConfigurationName: "MonthlyBudgetNotification-Chatbot"
+      IamRoleArn: !GetAtt ChatBotRole.Arn
+      LoggingLevel: "NONE"
+      SlackChannelId: "CP3FXK0UD"
+      SlackWorkspaceId: "THASWGEBB"
+      SnsTopicArns:
+        - !Ref BudgetAlertTopic
+  MonthlyBudget:
+    Type: "AWS::Budgets::Budget"
+    Properties:
+      Budget:
+        BudgetLimit:
+          Amount: 5
+          Unit: "USD"
+        # BudgetName にマルチバイト文字を利用すると CloudFormation の Web UI 上で
+        #  "???" のような表示になってうまくリンク先に飛べないので注意
+        BudgetName: "Monthly Budget"
+        BudgetType: "COST"
+        TimeUnit: "MONTHLY"
+        CostTypes:
+          IncludeCredit: false
+          IncludeDiscount: true
+          IncludeOtherSubscription: true
+          IncludeRecurring: true
+          IncludeRefund: false
+          IncludeSubscription: true
+          IncludeSupport: true
+          IncludeTax: true
+          IncludeUpfront: true
+          UseAmortized: false
+          UseBlended: false
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: "ACTUAL"
+            ComparisonOperator: "GREATER_THAN"
+            Threshold: 90
+            ThresholdType: "PERCENTAGE"
+          Subscribers:
+            - SubscriptionType: "EMAIL"
+              Address: "tkfmnkn@gmail.com"
+            - SubscriptionType: "SNS"
+              Address: !Ref BudgetAlertTopic
