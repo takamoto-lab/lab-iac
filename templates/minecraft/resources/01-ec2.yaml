@@ -1,0 +1,102 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("tags.lib.yaml", "tags")
+#@overlay/match by=overlay.all, expects="0+"
+---
+#@overlay/match missing_ok=True
+#@overlay/match-child-defaults expects=0
+Resources:
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: #@ data.values.minecraft.image_id
+      KeyName:
+        Ref: KeyName
+      InstanceType: #@ data.values.minecraft.instance_type
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId:
+            Ref: NetworkPublicSubnet
+          GroupSet:
+            - Ref: EC2SecurityGroup
+      UserData:
+        Fn::Base64: #@ data.read("userdata.sh")
+      Tags: #@ tags("ec2")
+
+  EC2Volume:
+    Type: AWS::EC2::Volume
+    Properties:
+      Size: "8"
+      AvailabilityZone: ap-northeast-1a
+      Tags: #@ tags("ebs")
+
+  EC2AttachEBS:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId:
+        Ref: EC2Instance
+      VolumeId:
+        Ref: EC2Volume
+      Device: /dev/sdf
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: minecraft-sg
+      GroupDescription: Allow SSH and Minecraft Default Port
+      VpcId:
+        Ref: NetworkVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 25565
+          ToPort: 25565
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp:
+            Ref: SshIpAddressRange
+
+  EC2EIP:
+    Type: "AWS::EC2::EIP"
+    Properties:
+      Domain: vpc
+      Tags: #@ tags("eip")
+
+  EC2AssociateEIP:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId:
+        Ref: EC2Instance
+      EIP:
+        Ref: EC2EIP
+
+  DlmLifecyclePolicy:
+    Type: AWS::DLM::LifecyclePolicy
+    Properties:
+      State: ENABLED
+      Description: Minecraft Snapshot Lifecycle
+      ExecutionRoleArn:
+        Fn::Join:
+          - ''
+          - - 'arn:aws:iam::'
+            - Ref: 'AWS::AccountId'
+            - ':role/service-role/AWSDataLifecycleManagerDefaultRole'
+      PolicyDetails:
+        ResourceTypes:
+          - VOLUME
+        TargetTags:
+          - Key: Name
+            Value: ebs-minecraft
+        Schedules:
+          - Name: Minecraft Snapshot Every 12 Hours
+            CreateRule:
+              Interval: 12
+              IntervalUnit: HOURS
+              Times:
+                - '16:00'
+            RetainRule:
+              Count: 7
+            CopyTags: true
