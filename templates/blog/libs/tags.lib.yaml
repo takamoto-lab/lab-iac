@@ -1,0 +1,2 @@
+#@ load("@ytt:data", "data")
+#@ def tags(name): return [{"Key": "Type", "Value": "blog"}, {"Key": "Name", "Value": "{}-blog".format(name)}]
