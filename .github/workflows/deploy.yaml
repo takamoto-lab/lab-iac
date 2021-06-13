@@ -25,8 +25,9 @@ jobs:
         env:
           STACK_NAME: budget
         run: |
+          make build
           aws cloudformation deploy \
             --stack-name ${STACK_NAME} \
-            --template-file ${STACK_NAME}.yaml \
+            --template-file ./_build/${STACK_NAME}.yaml \
             --no-fail-on-empty-changeset \
             --capabilities CAPABILITY_NAMED_IAM
