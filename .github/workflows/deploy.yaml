@@ -27,4 +27,26 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::715861157510:role/github-actions/cdk-deploy-job
           aws-region: ap-northeast-1
-      - run: aws sts get-caller-identity
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '18'
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+      - name: Install poetry
+        working-directory: ./aws
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+      - name: Poetry Install Dependencies
+        working-directory: ./aws
+        run: |
+          poetry install --no-interaction
+      - name: Install CDK Dependency
+        working-directory: ./aws
+        run: npm install -g aws-cdk
+      - name: Diff
+        working-directory: ./aws
+        run: cdk diff
