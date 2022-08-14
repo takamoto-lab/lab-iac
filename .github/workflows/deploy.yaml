@@ -1,33 +1,24 @@
-name: Deploy AWS Base Cloudformation Stacks
+name: Deploy AWS CloudFormation Stacks
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: 'Deploy CloudFormation stack name'
+        type: choice
+        options:
+        - AccountBudget
+        - MinecraftServer
+
 jobs:
   deploy:
-    name: Deploy Cloudformation Stacks
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    name: Deploy CloudFormation Stacks
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::715861157510:role/github-actions/sso_sample
           aws-region: ap-northeast-1
-
-      - name: Deploy budget Cloudformation Stack
-        env:
-          STACK_NAME: budget
-        run: |
-          make build
-          aws cloudformation deploy \
-            --stack-name ${STACK_NAME} \
-            --template-file ./_build/${STACK_NAME}.yaml \
-            --no-fail-on-empty-changeset \
-            --capabilities CAPABILITY_NAMED_IAM
+      - run: aws sts get-caller-identity
