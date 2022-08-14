@@ -8,6 +8,7 @@ on:
         options:
         - AccountBudget
         - MinecraftServer
+        - GitHubActionsOIDC
 
 permissions:
   id-token: write
