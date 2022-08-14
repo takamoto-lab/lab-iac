@@ -52,4 +52,4 @@ jobs:
           aws-region: ap-northeast-1
       - name: Diff
         working-directory: ./aws
-        run: poetry run cdk diff
+        run: poetry run cdk diff ${{ inputs.stack }}
