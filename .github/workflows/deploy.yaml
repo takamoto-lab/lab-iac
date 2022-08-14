@@ -13,6 +13,10 @@ permissions:
   id-token: write
   contents: read
 
+defaults:
+  run:
+    working-directory: ./aws
+
 jobs:
   deploy:
     environment:
@@ -36,12 +40,10 @@ jobs:
         with:
           python-version: '3.9'
       - name: Install poetry
-        working-directory: ./aws
         run: |
           curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
           echo "$HOME/.poetry/bin" >> $GITHUB_PATH
       - name: Poetry Install Dependencies
-        working-directory: ./aws
         run: |
           poetry install --no-interaction
 
@@ -50,6 +52,8 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::715861157510:role/github-actions/cdk-deploy-job
           aws-region: ap-northeast-1
-      - name: Diff
-        working-directory: ./aws
+      - name: Show diff
         run: poetry run cdk diff ${{ inputs.stack }}
+      - name: Execute deploy
+        run: poetry run cdk deploy --require-approval never ${{ inputs.stack }}
+
