@@ -1,7 +1,0 @@
-#@data/values
----
-
-global_values:
-  hosted_zones:
-    takamoto_dev:
-      id: Z08348221VRCAVEWA569X
