@@ -1,7 +1,0 @@
-#@data/values
-#@ load("@ytt:overlay", "overlay")
----
-#@overlay/match expects=0
-minecraft:
-  instance_type: t2.small
-  image_id: ami-0df99b3a8349462c6 #! UbuntuServer 20.04 x86
