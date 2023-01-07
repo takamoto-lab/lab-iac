@@ -1,5 +1,5 @@
 locals {
-  roles = set([
+  roles = toset([
     "tkfmnkn@gmail.com"
   ])
 }
@@ -12,13 +12,14 @@ data "tfe_outputs" "auth0_workspace_output" {
 resource "aws_iam_role" "iam_role_admin_user" {
   for_each = local.roles
   name = each.key
+  path = "/account/"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
           Effect = "Allow"
           Principal = {
-              Federated = tfe_outputs.auth0_workspace_output.saml_provider_arn
+              Federated = data.tfe_outputs.auth0_workspace_output.values.saml_provider_arn
           }
           Action = "sts:AssumeRoleWithSAML"
           Condition = {
@@ -32,7 +33,7 @@ resource "aws_iam_role" "iam_role_admin_user" {
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachment_iam_role_admin_user" {
-  for_each = var.iam_roles
+  for_each = local.roles
   role = each.key
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
