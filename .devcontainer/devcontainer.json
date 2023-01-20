@@ -1,6 +1,6 @@
 {
     "remoteUser": "dev-user",
-    "workspaceFolder": "/home/dev-user",
+    "workspaceFolder": "/workspaces/dev-user",
     "build": {
         "dockerfile": "Dockerfile"
     },
