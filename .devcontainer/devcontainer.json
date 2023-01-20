@@ -1,9 +1,11 @@
 {
+    "remoteUser": "dev-user",
+    "workspaceFolder": "/home/dev-user",
     "build": {
-      "dockerfile": "Dockerfile"
+        "dockerfile": "Dockerfile"
     },
-	"customizations": {
-		"vscode": {
+    "customizations": {
+    "vscode": {
             "extensions": [
                 "ms-azuretools.vscode-docker",
                 "hashicorp.terraform"
