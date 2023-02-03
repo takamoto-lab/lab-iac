@@ -4,5 +4,6 @@ module "terraform-workspaces" {
   workspaces = {
     "admin-user": {},
     "auth0": {},
+    "aws-budgets": {},
   }
 }
