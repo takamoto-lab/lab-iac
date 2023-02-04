@@ -21,7 +21,7 @@ resource "aws_iam_role" "github_actions_iam_role" {
         Principal = {
           Federated = aws_iam_openid_connect_provider.github_actions_oidc_provider.arn
         }
-        Conditions = {
+        Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
