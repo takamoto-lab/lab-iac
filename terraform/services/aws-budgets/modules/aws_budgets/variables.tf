@@ -3,7 +3,7 @@ variable "budget_settings" {
     mail_address_list  = list(string),
     slack_workspace_id = string,
     slack_channel_id   = string,
-    amount_usd         = number
+    amount_usd         = string
   }))
   description = "予算の設定"
 }
