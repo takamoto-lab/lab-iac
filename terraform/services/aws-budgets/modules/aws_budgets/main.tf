@@ -21,12 +21,13 @@ resource "aws_iam_role" "notification_chatbot_role" {
       Version = "2012-10-17"
       Statement = [
         {
+          Effect = "Allow"
           Action = [
             "cloudwatch:Describe*",
             "cloudwatch:Get*",
             "cloudwatch:List*",
           ]
-          Resource = ["*"]
+          Resource = "*"
         }
       ]
     })

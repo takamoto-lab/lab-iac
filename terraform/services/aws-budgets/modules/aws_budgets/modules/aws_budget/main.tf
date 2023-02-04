@@ -11,11 +11,12 @@ resource "aws_sns_topic_policy" "notification_sns_topic_policy" {
 data "aws_iam_policy_document" "notification_sns_topic_policy_document" {
   statement {
     actions = ["SNS:Publish"]
+    resources = [aws_sns_topic.notification_sns_topic.arn]
+
     principals {
-      type        = "AWS"
+      type        = "Service"
       identifiers = ["budgets.amazonaws.com"]
     }
-    resources = [aws_sns_topic.notification_sns_topic.arn]
   }
 }
 
@@ -23,7 +24,7 @@ resource "aws_budgets_budget" "budget" {
   name              = var.budget_name
   budget_type       = "COST"
   time_unit         = "MONTHLY"
-  time_period_start = "2022-08-01"
+  time_period_start = "2022-08-01_00:00"
   limit_amount      = var.amount_usd
   limit_unit        = "USD"
 
