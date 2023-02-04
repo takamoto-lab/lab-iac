@@ -24,6 +24,6 @@ variable "slack_channel_id" {
 }
 
 variable "amount_usd" {
-  type = number
+  type = string
   description = "予算（USD）"
 }

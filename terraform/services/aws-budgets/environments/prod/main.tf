@@ -8,7 +8,7 @@ module "aws_budgets" {
       ]
       slack_workspace_id = "THASWGEBB"
       slack_channel_id   = "CP3FXK0UD"
-      amount_usd         = 5
+      amount_usd         = "5.0"
     }
   }
 }
