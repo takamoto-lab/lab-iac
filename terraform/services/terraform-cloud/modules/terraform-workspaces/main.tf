@@ -30,3 +30,20 @@ resource "tfe_workspace" "workspaces" {
     oauth_token_id = data.tfe_oauth_client.oauth_client.oauth_token_id
   }
 }
+
+resource "tfe_workspace_variable_set" "workspace_variable_set" {
+  for_each = {
+    for obj in flatten([
+      for index_key, settings in var.workspaces : [
+        for variable_set_id in settings.variable_set_id_list : {
+          id = "${index_key}:${variable_set_id}"
+          index_key = index_key
+          variable_set_id = variable_set_id
+        }
+      ]
+    ]) : obj.id => obj
+  }
+
+  workspace_id = tfe_workspace.workspaces[each.value.index_key].id
+  variable_set_id = each.value.variable_set_id
+}
