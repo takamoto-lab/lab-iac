@@ -1,5 +1,5 @@
 variable "env_name" {
-  type = string
+  type        = string
   description = "デプロイ先の環境名"
 }
 
