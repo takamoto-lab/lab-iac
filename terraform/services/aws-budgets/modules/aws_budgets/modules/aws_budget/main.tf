@@ -11,11 +11,12 @@ resource "aws_sns_topic_policy" "notification_sns_topic_policy" {
 data "aws_iam_policy_document" "notification_sns_topic_policy_document" {
   statement {
     actions = ["SNS:Publish"]
+    resources = [aws_sns_topic.notification_sns_topic.arn]
+
     principals {
-      type        = "AWS"
+      type        = "Service"
       identifiers = ["budgets.amazonaws.com"]
     }
-    resources = [aws_sns_topic.notification_sns_topic.arn]
   }
 }
 
