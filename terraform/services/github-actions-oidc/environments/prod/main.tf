@@ -7,9 +7,14 @@ module "github_actions_oidc" {
         "repo:takamoto-lab/lab-iac:environment:production"
       ]
       inline_policy = jsonencode({
-        Effect   = "Allow"
-        Action   = "*"
-        Resource = "*"
+        Version = "2012-10-17"
+        Statement = [
+          {
+            Effect   = "Allow"
+            Action   = "*"
+            Resource = "*"
+          }
+        ]
       })
     }
   }
