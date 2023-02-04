@@ -5,5 +5,6 @@ module "terraform-workspaces" {
     "admin-user": {},
     "auth0": {},
     "aws-budgets": {},
+    "github-actions-oidc": {},
   }
 }
