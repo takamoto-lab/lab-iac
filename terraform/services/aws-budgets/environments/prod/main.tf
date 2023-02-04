@@ -7,8 +7,8 @@ module "aws_budgets" {
         "tkfmnkn@gmail.com"
       ]
       slack_workspace_id = "THASWGEBB"
-      slack_channel_id = "CP3FXK0UD"
-      amount_usd = 5
+      slack_channel_id   = "CP3FXK0UD"
+      amount_usd         = 5
     }
   }
 }
