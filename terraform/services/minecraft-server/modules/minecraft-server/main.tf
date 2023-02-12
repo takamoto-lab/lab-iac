@@ -76,7 +76,8 @@ resource "aws_ecs_service" "ecs_service" {
   task_definition = aws_ecs_task_definition.ecs_task_def.arn
 
   desired_count = 1
-  launch_type   = "FARGATE"
+  # Minecraft が複数同時起動した際の挙動を把握していないので、安全のために1つしか立ち上がらないようにしておく。
+  deployment_maximum_percent = 100
 
   capacity_provider_strategy {
     capacity_provider = "FARGATE_SPOT"
