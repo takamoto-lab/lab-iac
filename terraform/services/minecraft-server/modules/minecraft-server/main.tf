@@ -89,4 +89,8 @@ resource "aws_ecs_service" "ecs_service" {
       for az, subnet in data.aws_subnet.subnets : subnet.id
     ]
   }
+
+  lifecycle {
+    ignore_changes = ["desired_count"]
+  }
 }
