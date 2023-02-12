@@ -48,12 +48,36 @@ resource "aws_ecs_cluster" "ecs_cluster" {
   name = "minecraft-server"
 }
 
+resource "aws_iam_role" "iam_role_ecs_task_execution" {
+  name = "minecraft-server_ecs-task-execution"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "sts:AssumeRole"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "policy_attachment_ecs_task_execution" {
+  role = aws_iam_role.iam_role_ecs_task_execution.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
 resource "aws_ecs_task_definition" "ecs_task_def" {
   family                   = "minecraft-server"
   cpu                      = 512
   memory                   = 4096
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
+
+  execution_role_arn = aws_iam_role.iam_role_ecs_task_execution.arn
+
   container_definitions = jsonencode([
     {
       name  = "minecraft-server-container",
