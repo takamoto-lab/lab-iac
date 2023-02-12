@@ -43,9 +43,11 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 }
 
 resource "aws_ecs_task_definition" "ecs_task_def" {
-  family = "minecraft-server"
-  cpu    = 512
-  memory = 4096
+  family                   = "minecraft-server"
+  cpu                      = 512
+  memory                   = 4096
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
   container_definitions = jsonencode([
     {
       name  = "minecraft-server-container",
@@ -60,6 +62,11 @@ resource "aws_ecs_task_definition" "ecs_task_def" {
       ],
     }
   ])
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
 
   volume {
     name = "data"
