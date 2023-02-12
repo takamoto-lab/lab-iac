@@ -84,7 +84,8 @@ resource "aws_ecs_service" "ecs_service" {
 
   desired_count = 1
   # Minecraft が複数同時起動した際の挙動を把握していないので、安全のために1つしか立ち上がらないようにしておく。
-  deployment_maximum_percent = 100
+  deployment_maximum_percent         = 100
+  deployment_minimum_healthy_percent = 0
 
   capacity_provider_strategy {
     capacity_provider = "FARGATE_SPOT"
