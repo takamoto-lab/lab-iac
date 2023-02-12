@@ -19,12 +19,5 @@ module "efs" {
   version = "1.1.1"
 
   name   = "minecraft-server"
-
-  security_group_name   = "minecraft-server_efs"
-  security_group_vpc_id = module.vpc.vpc_id
-  security_group_rules = {
-    vpc = { cidr_blocks = local.cidr_blocks }
-  }
-
   enable_backup_policy = true
 }
