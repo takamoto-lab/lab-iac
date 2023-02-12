@@ -5,7 +5,7 @@ locals {
 }
 
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source  = "terraform-aws-modules/vpc/aws"
   version = "3.19.0"
 
   name           = "minecraft-server"
@@ -21,10 +21,10 @@ data "aws_subnet" "subnets" {
 }
 
 module "efs" {
-  source = "terraform-aws-modules/efs/aws"
+  source  = "terraform-aws-modules/efs/aws"
   version = "1.1.1"
 
-  name   = "minecraft-server"
+  name = "minecraft-server"
   mount_targets = {
     for az, subnet in data.aws_subnet.subnets : az => { subnet_id = "${subnet.id}" }
   }
@@ -36,4 +36,61 @@ module "efs" {
   }
 
   enable_backup_policy = true
+}
+
+resource "aws_ecs_cluster" "ecs_cluster" {
+  name = "minecraft-server"
+}
+
+resource "aws_ecs_task_definition" "ecs_task_def" {
+  family = "minecraft-server"
+  cpu    = 512
+  memory = 4096
+  container_definitions = jsonencode([
+    {
+      name  = "minecraft-server-container",
+      image = "itzg/minecraft-server:latest",
+      environment = [
+        { name = "EULA", value = "TRUE" },
+        { name = "MEMORY", value = "4G" },
+        { name = "TYPE", value = "PAPER" },
+      ],
+      portMappings = [
+        { containerPort = 25565 },
+      ],
+    }
+  ])
+
+  volume {
+    name = "data"
+    efs_volume_configuration {
+      file_system_id = module.efs.id
+      root_directory = "/data"
+    }
+  }
+}
+
+resource "aws_ecs_service" "ecs_service" {
+  name            = "minecraft-server"
+  cluster         = aws_ecs_cluster.ecs_cluster.id
+  task_definition = aws_ecs_task_definition.ecs_task_def.arn
+
+  desired_count = 1
+  launch_type   = "FARGATE"
+
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE_SPOT"
+    base              = 1
+    weight            = 1
+  }
+  network_configuration {
+    assign_public_ip = true
+    subnets = [
+      for az, subnet in data.aws_subnet.subnets : subnet.id
+    ]
+  }
+
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
 }
