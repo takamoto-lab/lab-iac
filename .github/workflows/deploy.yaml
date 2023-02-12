@@ -6,9 +6,7 @@ on:
         description: 'Deploy CloudFormation stack name'
         type: choice
         options:
-        - AccountBudget
         - MinecraftServer
-        - GitHubActionsOIDC
 
 permissions:
   id-token: write
@@ -51,7 +49,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::715861157510:role/github-actions/cdk-deploy-job
+          role-to-assume: arn:aws:iam::715861157510:role/github-actions-oidc/github-actions-oidc_aws-account-management
           aws-region: ap-northeast-1
       - name: Show diff
         run: poetry run cdk diff ${{ inputs.stack }}
