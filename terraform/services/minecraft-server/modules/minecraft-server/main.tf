@@ -12,6 +12,10 @@ module "vpc" {
   cidr           = local.vpc_cidr
   azs            = local.availability_zones
   public_subnets = local.cidr_blocks
+  # EFS をマウントする際に必要。
+  # false の場合、「Failed to resolve "fs-xxxxxxxxxxx.efs.us-east-1.amazonaws.com"」 のようなエラーが出る。
+  # Ref. https://aws.amazon.com/jp/premiumsupport/knowledge-center/fargate-unable-to-mount-efs/
+  enable_dns_hostnames = true
 }
 
 data "aws_subnet" "subnets" {
@@ -28,6 +32,8 @@ module "efs" {
   mount_targets = {
     for az, subnet in data.aws_subnet.subnets : az => { subnet_id = "${subnet.id}" }
   }
+
+  deny_nonsecure_transport = true
 
   security_group_name   = "minecraft-server_efs"
   security_group_vpc_id = module.vpc.vpc_id
@@ -73,6 +79,7 @@ resource "aws_ecs_task_definition" "ecs_task_def" {
     efs_volume_configuration {
       file_system_id = module.efs.id
       root_directory = "/data"
+      transit_encryption = "ENABLED"
     }
   }
 }
