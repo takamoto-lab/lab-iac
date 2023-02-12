@@ -28,5 +28,10 @@ module "terraform-workspaces" {
         local.aws_variable_set
       ]
     },
+    "minecraft-server" : {
+      variable_set_id_list = [
+        local.aws_variable_set
+      ]
+    },
   }
 }
