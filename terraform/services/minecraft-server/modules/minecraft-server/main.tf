@@ -43,9 +43,9 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 }
 
 resource "aws_ecs_task_definition" "ecs_task_def" {
-  family = "minecraft-server"
-  cpu    = 512
-  memory = 4096
+  family                   = "minecraft-server"
+  cpu                      = 512
+  memory                   = 4096
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   container_definitions = jsonencode([
