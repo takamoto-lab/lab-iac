@@ -6,6 +6,7 @@ locals {
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
+  version = "3.19.0"
 
   name           = "minecraft-server"
   cidr           = local.vpc_cidr
@@ -21,6 +22,8 @@ data "aws_subnet" "subnets" {
 
 module "efs" {
   source = "terraform-aws-modules/efs/aws"
+  version = "1.1.1"
+
   name   = "minecraft-server"
   mount_targets = {
     for az, subnet in data.aws_subnet.subnets : az => { subnet_id = "${subnet.id}" }
