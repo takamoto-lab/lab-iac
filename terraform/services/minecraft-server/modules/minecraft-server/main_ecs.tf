@@ -51,7 +51,7 @@ resource "aws_ecs_task_definition" "ecs_task_def" {
   container_definitions = jsonencode([
     {
       name  = "minecraft-server-container",
-      image = "itzg/minecraft-server:latest",
+      image = "public.ecr.aws/itzg/minecraft-server:latest",
       environment = [
         { name = "EULA", value = "TRUE" },
         { name = "MEMORY", value = "4G" },
