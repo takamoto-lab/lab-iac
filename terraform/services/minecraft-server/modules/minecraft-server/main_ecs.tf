@@ -43,8 +43,8 @@ resource "aws_security_group" "sg_expose_minecraft_port" {
 
 resource "aws_ecs_task_definition" "ecs_task_def" {
   family                   = "minecraft-server"
-  cpu                      = 512
-  memory                   = 4096
+  cpu                      = "1024"
+  memory                   = "4096"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
 
