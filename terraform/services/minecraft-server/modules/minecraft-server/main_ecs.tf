@@ -62,6 +62,9 @@ resource "aws_ecs_task_definition" "ecs_task_def" {
       portMappings = [
         { containerPort = 25565 },
       ],
+      mountPoints = [
+        { containerPath = "/data", sourceVolume = "minecraft-data" },
+      ],
     }
   ])
 
@@ -71,10 +74,11 @@ resource "aws_ecs_task_definition" "ecs_task_def" {
   }
 
   volume {
-    name = "data"
+    name = "minecraft-data"
+
     efs_volume_configuration {
       file_system_id = aws_efs_file_system.efs.id
-      root_directory = "/data"
+      root_directory = "/"
       transit_encryption = "ENABLED"
     }
   }
