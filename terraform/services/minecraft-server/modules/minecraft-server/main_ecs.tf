@@ -23,6 +23,22 @@ resource "aws_iam_role_policy_attachment" "policy_attachment_ecs_task_execution"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_security_group" "sg_expose_minecraft_port" {
+  name        = "minecraft-server_expose-minecraft-port"
+  vpc_id      = aws_vpc.vpc.id
+
+  ingress {
+    from_port   = 25565
+    to_port     = 25565
+    protocol    = "tcp"
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+  }
+}
+
 resource "aws_ecs_task_definition" "ecs_task_def" {
   family                   = "minecraft-server"
   cpu                      = 512
@@ -35,7 +51,7 @@ resource "aws_ecs_task_definition" "ecs_task_def" {
   container_definitions = jsonencode([
     {
       name  = "minecraft-server-container",
-      image = "itzg/minecraft-server:latest",
+      image = "public.ecr.aws/itzg/minecraft-server:latest",
       environment = [
         { name = "EULA", value = "TRUE" },
         { name = "MEMORY", value = "4G" },
@@ -81,7 +97,8 @@ resource "aws_ecs_service" "ecs_service" {
     assign_public_ip = true
     subnets = [for az, subnet in aws_subnet.subnets : subnet.id]
     security_groups = [
-      aws_security_group.sg_allow_ingress_to_efs.id
+      aws_security_group.sg_allow_ingress_to_efs.id,
+      aws_security_group.sg_expose_minecraft_port.id
     ]
   }
 
