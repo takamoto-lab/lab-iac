@@ -41,6 +41,10 @@ resource "aws_security_group" "sg_expose_minecraft_port" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "log_group_server" {
+  name = "/minecraft-server/server"
+}
+
 resource "aws_ecs_task_definition" "ecs_task_def" {
   family                   = "minecraft-server"
   cpu                      = "1024"
@@ -65,6 +69,14 @@ resource "aws_ecs_task_definition" "ecs_task_def" {
       mountPoints = [
         { containerPath = "/data", sourceVolume = "minecraft-data" },
       ],
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.log_group_server.name
+          "awslogs-region"        = "ap-northeast-1"
+          "awslogs-stream-prefix" = "minecraft-server"
+        }
+      }
     }
   ])
 
