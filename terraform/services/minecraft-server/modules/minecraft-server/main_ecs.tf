@@ -79,8 +79,9 @@ resource "aws_ecs_service" "ecs_service" {
   }
   network_configuration {
     assign_public_ip = true
-    subnets = [
-      for az, subnet in data.aws_subnet.subnets : subnet.id
+    subnets = [for az, subnet in aws_subnet.subnets : subnet.id]
+    security_groups = [
+      aws_security_group.sg_allow_ingress_to_efs.id
     ]
   }
 
