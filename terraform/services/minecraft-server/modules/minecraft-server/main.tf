@@ -33,7 +33,9 @@ module "efs" {
     for az, subnet in data.aws_subnet.subnets : az => { subnet_id = "${subnet.id}" }
   }
 
-  deny_nonsecure_transport = true
+  # ECS でマウントする際に aws:SecureTransport が設定されていると何故かマウントできない。
+  # マウントできない原因は後で調査するものとして、一旦は aws:SecureTransport を無効化する。
+  deny_nonsecure_transport = false
 
   security_group_name   = "minecraft-server_efs"
   security_group_vpc_id = module.vpc.vpc_id
