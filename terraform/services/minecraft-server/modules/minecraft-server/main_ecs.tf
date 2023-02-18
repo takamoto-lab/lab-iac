@@ -1,51 +1,3 @@
-locals {
-  vpc_cidr           = "10.0.0.0/16"
-  availability_zones = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
-  cidr_blocks        = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-}
-
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "3.19.0"
-
-  name           = "minecraft-server"
-  cidr           = local.vpc_cidr
-  azs            = local.availability_zones
-  public_subnets = local.cidr_blocks
-  # EFS をマウントする際に必要。
-  # false の場合、「Failed to resolve "fs-xxxxxxxxxxx.efs.us-east-1.amazonaws.com"」 のようなエラーが出る。
-  # Ref. https://aws.amazon.com/jp/premiumsupport/knowledge-center/fargate-unable-to-mount-efs/
-  enable_dns_hostnames = true
-}
-
-data "aws_subnet" "subnets" {
-  for_each          = toset(local.availability_zones)
-  vpc_id            = module.vpc.vpc_id
-  availability_zone = each.key
-}
-
-module "efs" {
-  source  = "terraform-aws-modules/efs/aws"
-  version = "1.1.1"
-
-  name = "minecraft-server"
-  mount_targets = {
-    for az, subnet in data.aws_subnet.subnets : az => { subnet_id = "${subnet.id}" }
-  }
-
-  # ECS でマウントする際に aws:SecureTransport が設定されていると何故かマウントできない。
-  # マウントできない原因は後で調査するものとして、一旦は aws:SecureTransport を無効化する。
-  deny_nonsecure_transport = false
-
-  security_group_name   = "minecraft-server_efs"
-  security_group_vpc_id = module.vpc.vpc_id
-  security_group_rules = {
-    vpc = { cidr_blocks = local.cidr_blocks }
-  }
-
-  enable_backup_policy = true
-}
-
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = "minecraft-server"
 }
@@ -103,7 +55,7 @@ resource "aws_ecs_task_definition" "ecs_task_def" {
   volume {
     name = "data"
     efs_volume_configuration {
-      file_system_id = module.efs.id
+      file_system_id = aws_efs_file_system.efs.id
       root_directory = "/data"
       transit_encryption = "ENABLED"
     }
